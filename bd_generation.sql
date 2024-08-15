@@ -6,7 +6,6 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS public.task_logs
 (
     date date NOT NULL,
-    difficulty smallint NOT NULL,
     is_correct boolean NOT NULL,
     task_id smallint NOT NULL,
     task_number smallint NOT NULL,
@@ -25,12 +24,6 @@ CREATE TABLE IF NOT EXISTS public.tasks
     dislikes bigint NOT NULL DEFAULT 0,
     difficulty smallint NOT NULL,
     parent_variant_id bigint
-);
-
-CREATE TABLE IF NOT EXISTS public.variants
-(
-    variant_id bigint NOT NULL,
-    passed_count bigint NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS public.users
@@ -76,6 +69,25 @@ CREATE TABLE IF NOT EXISTS public.ads
     ad_link character varying
 );
 
+CREATE TABLE IF NOT EXISTS public.variants
+(
+    variant_id bigint NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.variants_tasks
+(
+    variants_variant_id bigint NOT NULL,
+    tasks_task_id bigint NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.task_additional_info
+(
+    task_id bigint NOT NULL,
+    likes bigint NOT NULL DEFAULT 0,
+    dislikes bigint NOT NULL DEFAULT 0,
+    chat_id bigint NOT NULL
+);
+
 ALTER TABLE IF EXISTS public.tasks
     ADD FOREIGN KEY (task_id)
     REFERENCES public.task_logs (task_id) MATCH SIMPLE
@@ -101,16 +113,8 @@ ALTER TABLE IF EXISTS public.tasks
 
 
 ALTER TABLE IF EXISTS public.tasks
-    ADD FOREIGN KEY (difficulty)
-    REFERENCES public.task_logs (difficulty) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE IF EXISTS public.tasks
-    ADD FOREIGN KEY (parent_variant_id)
-    REFERENCES public.variants (variant_id) MATCH SIMPLE
+    ADD FOREIGN KEY (task_id)
+    REFERENCES public.task_additional_info (task_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
@@ -156,9 +160,33 @@ ALTER TABLE IF EXISTS public.messages_data
     NOT VALID;
 
 
+ALTER TABLE IF EXISTS public.messages_data
+    ADD FOREIGN KEY (chat_id)
+    REFERENCES public.task_additional_info (chat_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
 ALTER TABLE IF EXISTS public.appeals
     ADD FOREIGN KEY (creator_id)
     REFERENCES public.users (user_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.variants_tasks
+    ADD FOREIGN KEY (variants_variant_id)
+    REFERENCES public.variants (variant_id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.variants_tasks
+    ADD FOREIGN KEY (tasks_task_id)
+    REFERENCES public.tasks (task_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
